@@ -1,12 +1,12 @@
 Summary:	simple INI parsing library
 Summary(pl.UTF-8):	prosta biblioteka analizy plików INI
 Name:		libconfini
-Version:	1.8.2
+Version:	1.8.3
 Release:	1
 License:	GPL v3
 Group:		Libraries
 Source0:	https://github.com/madmurphy/libconfini/archive/%{version}.tar.gz
-# Source0-md5:	c52e06253ff9f4cf4cb66cc43d13553c
+# Source0-md5:	fdca218f2c7700e3c689f7b6da0845fd
 URL:		https://madmurphy.github.io/libconfini/html/index.html
 BuildRequires:	autoconf
 BuildRequires:	automake
