@@ -1,17 +1,18 @@
-Summary:	simple INI parsing library
-Summary(pl.UTF-8):	prosta biblioteka analizy plików INI
+Summary:	Simple INI parsing library
+Summary(pl.UTF-8):	Prosta biblioteka analizy plików INI
 Name:		libconfini
-Version:	1.14.0
+Version:	1.16.4
 Release:	1
-License:	GPL v3
+License:	GPL v3+
 Group:		Libraries
-Source0:	https://github.com/madmurphy/libconfini/archive/%{version}.tar.gz
-# Source0-md5:	cc9e084a079956229bdfcc6150a72b92
+#Source0Download: https://github.com/madmurphy/libconfini/releases
+Source0:	https://github.com/madmurphy/libconfini/archive/%{version}/%{name}-%{version}.tar.gz
+# Source0-md5:	41ae0f82abd939953e7d28c2e3f28636
 URL:		https://madmurphy.github.io/libconfini/html/index.html
-BuildRequires:	autoconf
-BuildRequires:	automake
-BuildRequires:	intltool
-BuildRequires:	libtool
+BuildRequires:	autoconf >= 2.68
+BuildRequires:	automake >= 1:1.11
+BuildRequires:	libtool >= 2:2
+BuildRequires:	rpm-build >= 4.6
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -39,7 +40,7 @@ TOML).
 %description -l pl.UTF-8
 libconfini to najlepsza i najbardziej spójna biblioteka analizatorów
 plików INI napisana w języku C. Skupia się ona na standaryzacji i
-analizie dokładności i jest łatwa w prawie każdym typie pliku
+dokładności analizy, radzi sobie z prawie każdym typem pliku
 zawierającego pary klucz / wartość.
 
 Biblioteka jest szybka i odpowiednia dla systemów wbudowanych. Jego
@@ -53,8 +54,8 @@ niestandardowego wywołania zwrotnego wywoływanego dla każdego
 czytanego węzła INI. Interfejs API został zaprojektowany tak, aby był
 wydajny, elastyczny i prosty w użyciu.
 
-Z libconfini znajdziesz w plikach INI tę samą moc serializacji, jaką
-zwykle można znaleźć w innych silnie ustrukturyzowanych formatach
+Z libconfini można znaleźć w plikach INI tę samą moc serializacji,
+jaką zwykle można znaleźć w innych silnie ustrukturyzowanych formatach
 (takich jak JXON, YAML, TOML), ale z zaletą użycia najbardziej
 czytelnego formatu konfiguracji, jaki kiedykolwiek wymyślono (dzięki
 ich status nieformalny, pliki INI są rzeczywiście bardziej płynne i
@@ -85,15 +86,28 @@ Static %{name} library.
 %description static -l pl.UTF-8
 Statyczna biblioteka %{name}.
 
+%package apidocs
+Summary:	API documentation for libconfini library
+Summary(pl.UTF-8):	Dokumentacja API biblioteki libconfini
+Group:		Documentation
+BuildArch:	noarch
+
+%description apidocs
+API documentation for libconfini library.
+
+%description apidocs -l pl.UTF-8
+Dokumentacja API biblioteki libconfini.
+
 %prep
 %setup -q
 
 %build
 %{__libtoolize}
-%{__aclocal}
+%{__aclocal} -I m4
 %{__autoconf}
 %{__automake}
-%configure
+%configure \
+	--disable-silent-rules
 %{__make}
 
 %install
@@ -102,7 +116,14 @@ rm -rf $RPM_BUILD_ROOT
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-rm -rf $RPM_BUILD_ROOT%{_docdir}/%{name}
+# obsoleted by pkg-config
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libconfini.la
+
+install -d $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+cp -pr examples/* $RPM_BUILD_ROOT%{_examplesdir}/%{name}-%{version}
+
+# packaged as %doc or in examplesdir
+%{__rm} -r $RPM_BUILD_ROOT%{_docdir}/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -112,24 +133,34 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc AUTHORS ChangeLog* MANUAL.md NEWS README* examples/ docs/html docs/manual.html
-%attr(755,root,root) %{_libdir}/%{name}.so.*.*.*
-%attr(755,root,root) %ghost %{_libdir}/%{name}.so.0
+%doc AUTHORS ChangeLog MANUAL.md NEWS README.md examples/
+%attr(755,root,root) %{_libdir}/libconfini.so.*.*.*
+%attr(755,root,root) %ghost %{_libdir}/libconfini.so.0
 
 %files devel
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/%{name}.so
+%attr(755,root,root) %{_libdir}/libconfini.so
+%{_includedir}/confini.h
+%{_includedir}/confini-1.h
+%{_includedir}/confini-1.16.h
+%{_pkgconfigdir}/libconfini.pc
 %{_mandir}/man3/IniDispatch.3*
 %{_mandir}/man3/IniFormat.3*
 %{_mandir}/man3/IniStatistics.3*
 %{_mandir}/man3/confini.h.3*
 %{_mandir}/man3/libconfini.3*
-%{_libdir}/libconfini.la
-%{_includedir}/confini.h
-%{_includedir}/confini-1.h
-%{_includedir}/confini-1.14.h
-%{_pkgconfigdir}/libconfini.pc
+%dir %{_examplesdir}/%{name}-%{version}
+%attr(755,root,root) %{_examplesdir}/%{name}-%{version}/run-example.sh
+%{_examplesdir}/%{name}-%{version}/cplusplus
+%{_examplesdir}/%{name}-%{version}/ini_files
+%{_examplesdir}/%{name}-%{version}/miscellanea
+%{_examplesdir}/%{name}-%{version}/topics
+%{_examplesdir}/%{name}-%{version}/utilities
 
 %files static
 %defattr(644,root,root,755)
-%{_libdir}/%{name}.a
+%{_libdir}/libconfini.a
+
+%files apidocs
+%defattr(644,root,root,755)
+%doc docs/{html,*.html}
